@@ -2,10 +2,11 @@ from app import db
 from app.api import bp
 from app.api.errors import bad_request, error_response
 from app.models import Snippet, SnippetScheme
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 from flask import abort, g, jsonify, request, make_response, url_for
 from marshmallow import fields
+from app.config import Config
 
 
 @bp.route('/snippets/<int:id>', methods=['GET'])
@@ -15,6 +16,9 @@ def get_snippet(id):
     now = datetime.utcnow()
     if snippet.expires < now:
         return error_response(status_code=403, message="This resource has expired and is no longer available")
+
+    snippet.expires += timedelta(hours=Config.EXPIRATION_INCREASE_HOURS)
+    db.session.commit()
 
     snippet_schema = SnippetScheme()
     return jsonify(snippet_schema.dump(snippet))
@@ -52,4 +56,4 @@ def create_snippet():
 #       includes the URL where the snippet can be read.
 # - OK: GET
 #       - OK: Resources would be inaccessible after expired
-#       - Snippets expiry should be extended when they are accessed.
+#       - OK: Snippets expiry should be extended when they are accessed.
