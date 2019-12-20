@@ -22,9 +22,3 @@ class SnippetScheme(ma.ModelSchema):
     _links = ma.Hyperlinks(
         {"self": ma.URLFor("api.get_user", id="<id>")}
     )
-
-# - POST request to create the snippet: 'name', 'snippet', 'expires'
-#       - The request to store the snippet should be replied to with a response that 
-#       includes the URL where the snippet can be read.
-# - GET
-#       - Snippets expiry should be extended when they are accessed.
