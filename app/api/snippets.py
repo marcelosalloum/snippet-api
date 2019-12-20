@@ -41,6 +41,10 @@ def create_snippet():
     snippet_scheme = SnippetScheme()
     snippet = Snippet()
     snippet_scheme.load(data, instance=snippet, partial=True)
+
+    if 'password' in data:
+        snippet.set_password(data['password'])
+
     db.session.add(snippet)
     db.session.commit()
 
@@ -50,6 +54,22 @@ def create_snippet():
     response.headers['Location'] = url_for('api.get_snippet', id=snippet.id)
     return response
 
+
+@bp.route('/snippets/<int:id>', methods=['PUT'])
+def update_snippet(id):
+    data = request.get_json() or {}
+    snippet = Snippet.query.get_or_404(id)
+
+    if 'password' not in data or not snippet.check_password(data['password']):
+        abort(403)
+
+    snippet_scheme = SnippetScheme()
+    snippet_scheme.load(data, instance=snippet, partial=True)
+    db.session.commit()
+
+    response = jsonify(snippet_scheme.dump(snippet))
+    response.status_code = 200
+    return response
 
 # - OK: POST request to create the snippet: 'name', 'snippet', 'expires'
 #       - OK: The request to store the snippet should be replied to with a response that

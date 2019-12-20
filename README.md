@@ -12,11 +12,16 @@ The two endpoints currently available are `[POST] /api/snippets` and `[GET] /api
 
 ### `[POST] /api/snippets`
 The request to store the snippet should accepts the fields below:
-- name: string (mandatory), the name of the snippet
-- expires: string (mandatory), the expiration date of the snippet. Please prefer to use a widely known string representation for datetime, such as ISO 8601 (YYYY-MM-DDTHH:MM:SS.mmmmmm)
-- snippet: string (mandatory), the snippet text itself
 
-This request stores the snippet and replies with a JSON representing the snippet, as well as the URL where the snippet can be read. Format:
+**Parameters:**
+- `name`: string (mandatory), the name of the snippet
+- `expires`: string (mandatory), the expiration date of the snippet. Please prefer to use a widely known string representation for datetime, such as ISO 8601 (YYYY-MM-DDTHH:MM:SS.mmmmmm)
+- `snippet`: string (mandatory), the snippet text itself
+- `password`: string (optional), can be used if the user decides to edit the snippet
+
+This request stores the snippet and replies with a JSON representing the snippet, as well as the URL where the snippet can be read. 
+
+**Response (status_code: 201):**
 ```json
 {
   "_links": {
@@ -33,7 +38,42 @@ The URL to the recently created resource also returns as in the `Location` heade
 
 ### `[GET] /api/snippets/<int:id>`
 
-This request returns the snippet as a JSON, as well as the URL where the snippet was read. Format:
+This request returns the snippet as a JSON, as well as the URL where the snippet was read.
+
+**Response (status_code: 200):**
+```json
+{
+  "_links": {
+    "self": "/api/snippets/1"
+  },
+  "expires": "2020-07-01T04:21:41",
+  "id": 1,
+  "name": "Test Snippet 2",
+  "snippet": "Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum Lorem ipslum"
+}
+```
+
+Important info about this endpoint:
+* The snippets can only be accessed at the `[GET] /api/snippets/{id}` endpoint before they expired. After expiration, the API will answer with a `403` status code.
+* Snippets expiration date will be extended every time they are accessed. The default extension time is 6 hours, but it can be edited from the .flaskenv file, located in the project root folder.
+
+The URL to the recently created resource also returns as in the `Location` header, with the full path like `"http://127.0.0.1:5000/api/snippets/1"` (when executed from localhost)
+
+### `[PUT] /api/snippets/<int:id>`
+
+This allows editing a snippet that was created with a password (optional field). The following fields can bve used in the PUT request:
+
+**Parameters:**
+- `name`: string (optional), the name of the snippet
+- `expires`: string (optional), the expiration date of the snippet. Please prefer to use a widely known string representation for datetime, such as ISO 8601 (YYYY-MM-DDTHH:MM:SS.mmmmmm)
+- `snippet`: string (optional), the snippet text itself
+- `password`: string (mandatory), can be used if the user decides to edit the snippet
+
+Please notice the PUT request can be used to change the expiration date of the snippet.
+
+It will return the snippet as a JSON, as well as the URL where the snippet was read. 
+
+**Response (status_code: 200):**
 ```json
 {
   "_links": {
@@ -81,5 +121,6 @@ Here is a list of improvements that would likely be needed for a production appl
 
 * Unit tests and API tests
 * Change SQLite to PostgreSQL, since the PostgreSQL includes: authentication system, ACID compliancy, Multiple Access, etc.
+* Move the snippets fromn a SQLite database to separated files
 * CI/CD
 * Add API versioning (e.g. v1, v2, etc.)
