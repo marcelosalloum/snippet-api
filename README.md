@@ -4,6 +4,7 @@ This is an API web server that accepts a snippet of text and makes that snippet
 available at a URL. Each snippet should be available as text at a URL until it
 expires. Snippets expiry should be extended when they are accessed.
 
+
 ## Brief Documentation
 
 The snippets are currently being stored in a SQLite file (app.db), which was the quickest solution and doesn't need a database server, like PostgreSQL or MySQL would.
